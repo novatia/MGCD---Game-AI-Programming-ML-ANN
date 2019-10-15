@@ -15,7 +15,7 @@ namespace ANN
         [SerializeField]
         private TrainingSetDescriptor m_FixedTrainingSet = null;
         [SerializeField]
-        private int m_EpochToTrain = 10000;
+        private int m_EpochToTrain = 100000;
 
         [SerializeField]
         private float[] m_Inputs = null;
