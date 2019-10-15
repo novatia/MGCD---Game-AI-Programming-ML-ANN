@@ -101,20 +101,37 @@ namespace Pong
             PongANNInput i_Input = new PongANNInput();
             i_Input.y_ball = mBall.transform.position.y;
 
-            PongANNOutput i_DesiredOutput;
-            i_DesiredOutput.y_competitor = mBall.transform.position.y;
-
             PongANNOutput i_Output;
 
             if (m_IsTrainingMode)
+            {
+                PongANNOutput i_DesiredOutput;
+                //i_DesiredOutput.y_competitor = mBall.transform.position.y;
+
+                if ((i_Input.y_ball - transform.position.y) > 0)
+                {
+                    i_DesiredOutput.y_competitor = 1;
+                }
+                else
+                {
+                    if ((i_Input.y_ball - transform.position.y) < 0)
+                    {
+                        i_DesiredOutput.y_competitor = -1;
+                    }
+                    else
+                    {
+                        i_DesiredOutput.y_competitor = 0;
+                    }
+                }
+
                 i_Output = Internal_TrainANN(i_Input, i_DesiredOutput);
+            }
             else
                 i_Output = Internal_RunANN(i_Input);
 
 
+            //Apply IA Controls
             float m_VerticalInput = i_Output.y_competitor;
-
-
 
             float targetSpeed = Mathf.Abs(m_VerticalInput * maxSpeed);
             Vector2 targetVelocity = Vector2.up * targetSpeed * Mathf.Sign(m_VerticalInput);
@@ -133,8 +150,6 @@ namespace Pong
 
                 transform.position = new Vector3(transform.position.x, nextY, transform.position.z);
             }
-
-
         }
 
         protected override void OnMovementAllowedChanged()
@@ -152,45 +167,50 @@ namespace Pong
         private PongANNOutput Internal_RunANN(PongANNInput i_Input)
         {
             float[] inputs = new float[1];
-            inputs[0] = i_Input.y_ball;
+            inputs = applyLogic(i_Input);
 
             float[] outputs = m_ANN.Run(inputs);
-
             PongANNOutput output = new PongANNOutput();
             output.y_competitor = outputs[0];
+
             return output;
         }
 
         private PongANNOutput Internal_TrainANN(PongANNInput i_Input, PongANNOutput i_DesiredOutput)
         {
             float[] inputs = new float[1];
+            inputs = applyLogic(i_Input);
 
-            inputs[0] = i_Input.y_ball;
             float[] desiredOutputs = new float[1];
-            if (i_Input.y_ball > 0)
-            {
-                desiredOutputs[0] = 1;
-                inputs[0] += 0.2f;
-            }
-            else
-            {
-                if (i_Input.y_ball < 0)
-                {
-                    desiredOutputs[0] = -1;
-                    inputs[0] -= 0.2f;
-                }
-                else
-                {
-                    desiredOutputs[0] = 0;
-                }
-            }
-            
+            desiredOutputs[0] = i_DesiredOutput.y_competitor;
+
             float[] outputs = m_ANN.Run(inputs);
             ANNFunctionLibrary.AdjustWeights(m_ANN, desiredOutputs);
 
             PongANNOutput output = new PongANNOutput();
             output.y_competitor = outputs[0];
             return output;
+        }
+
+        float[] applyLogic(PongANNInput i_Input)
+        {
+            float[] inputs = new float[1];
+
+            inputs[0] = i_Input.y_ball;
+
+            if ((i_Input.y_ball - transform.position.y) > 0)
+            {
+                inputs[0] += 0.25f;
+            }
+            else
+            {
+                if ((i_Input.y_ball - transform.position.y) < 0)
+                {
+                    inputs[0] -= 0.25f;
+                }
+            }
+
+            return inputs;
         }
     }
 }

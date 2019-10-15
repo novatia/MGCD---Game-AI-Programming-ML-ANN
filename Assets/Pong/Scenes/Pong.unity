@@ -1134,7 +1134,8 @@ MonoBehaviour:
   m_DrawGUI: 0
   m_DrawGizmos: 0
   m_Ball: {fileID: 505796218}
-  m_ANNDescriptorAsset: {fileID: 0}
+  m_ANNDescriptorAsset: {fileID: 11400000, guid: 4c4d4908e2b62b84f9a625ed20a6573f,
+    type: 2}
   m_ANNDescriptor:
     m_FirstLayerDescriptor:
       m_NeuronCount: 1
